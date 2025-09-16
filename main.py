@@ -10,7 +10,7 @@ from config import LoRAConfig, bnbConfig
 def test_KoLLM():
    data = data_load(path)
 
-   LLM = KoLLM(bnbConfig)
+   LLM = KoLLM(model_name, bnbConfig)
    LLM = LoRA(LLM.model)
    
    outputs = LLM.Inference(LLM, data)
@@ -27,5 +27,7 @@ def LoRA(model):
 
 
 if __name__ == "__main__":
+   model_name = ''
    path = './data/dataset.json'
+
    test_KoLLM()
