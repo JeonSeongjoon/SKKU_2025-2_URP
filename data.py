@@ -3,7 +3,9 @@ import pandas as pd
 
 
 def data_load(path):
-    data = json.load(path)
+    with open(path, "r") as file:
+        data = json.load(file)
+
     return data
 
 
