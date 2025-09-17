@@ -27,7 +27,7 @@ def LoRA(model):
 
 
 if __name__ == "__main__":
-   model_name = "EleutherAI/polyglot-ko-5.8b"
+   model_name = "MLP-KTLim/llama-3-Korean-Bllossom-8B"
    path = './data/dataset.json'
 
    test_KoLLM()
