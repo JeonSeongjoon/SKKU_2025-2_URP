@@ -14,7 +14,7 @@ class KoLLM():
         )
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.tokenizer.pad_token_id = self.okenizer.eos_token_id
+        self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
         self.tokenizer.padding_side = "left"
 
         self.instruction = '당신은 뛰어난 학생입니다, 주어지는 지문을 읽고 문제의 답을 고르세요.'
