@@ -11,7 +11,7 @@ def test_KoLLM():
    data = data_load(path)
 
    LLM = KoLLM(model_name, bnbConfig)
-   LLM = LoRA(LLM.model)
+   LLM.model = LoRA(LLM.model)
    
    outputs = LLM.Inference(data)
    toExcel(outputs)
