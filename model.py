@@ -21,7 +21,7 @@ class KoLLM():
 
 
     def Inference(self, data):
-        outputs = {}
+        outputs = {'answer' : []}
 
         with torch.no_grad():
             for i in range(3):
@@ -38,8 +38,8 @@ class KoLLM():
                         )
 
                 output = self.tokenizer.decode(output[0], skip_special_tokens=True)
-                outputs[i] = output
-
+                outputs['answer'].append(output)
+        
         return outputs
 
         

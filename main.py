@@ -14,7 +14,6 @@ def test_KoLLM():
    LLM.model = LoRA(LLM.model)
    
    outputs = LLM.Inference(data)
-   print(outputs)
    toExcel(outputs)
    
    return
