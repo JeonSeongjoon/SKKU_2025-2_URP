@@ -19,3 +19,6 @@ def Logging(output, save_path):
 
     res = pd.DataFrame(output)
     res.to_excel(res_path)
+
+
+# {"paragraphs" : , "problems" :, "answers" :, "parag_num" : , "prob_num" : },
