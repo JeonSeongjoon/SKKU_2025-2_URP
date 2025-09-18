@@ -2,6 +2,14 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
+def Question_set(instruction, paragraph, problem):
+    prompt = instruction + "\n지문 : " + paragraph + "\n문제 : " + problem + "\n 답 : "
+    question = instruction + "\n지문 : " + paragraph + "\n문제 : " + problem
+
+    return prompt, question
+    
+
+
 class KoLLM():
 
     def __init__(self, model_name, bnbConfig):
@@ -21,11 +29,13 @@ class KoLLM():
 
 
     def Inference(self, data):
-        outputs = {'answer' : []}
+        outputs = {'problem' : [], 'answer' : []}
 
         with torch.no_grad():
             for i in range(3):
-                inputs = self.tokenizer(self.instruction+"\n지문 : "+data["paragraphs"][i]+"\n문제 : "+data["problems"][i]+"\n 답 : ", return_tensors="pt").to(self.model.device)
+
+                prompt, question = Question_set(self.instruction, data["paragraphs"][i], data["problems"][i])
+                inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
 
                 output = self.model.generate(
                         **inputs,
@@ -38,7 +48,11 @@ class KoLLM():
                         )
 
                 output = self.tokenizer.decode(output[0], skip_special_tokens=True)
-                outputs['answer'].append(output)
+
+                Q_set_len = len(question)
+
+                outputs['problem'].append(output[:Q_set_len])
+                outputs['answer'].append(output[Q_set_len:])
         
         return outputs
 
