@@ -29,7 +29,7 @@ class KoLLM():
 
 
     def Inference(self, data):
-        outputs = {'problem' : [], 'answer' : []}
+        outputs = {'paragraph' : [], 'problem' : [], 'answer' : []}
 
         with torch.no_grad():
             for i in range(3):
@@ -51,7 +51,8 @@ class KoLLM():
 
                 Q_set_len = len(question)
 
-                outputs['problem'].append(output[:Q_set_len])
+                outputs['paragraph'].append(data["paragraphs"][i])
+                outputs['problem'].append(data["problems"][i])
                 outputs['answer'].append(output[Q_set_len:])
         
         return outputs
