@@ -4,9 +4,9 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 def Question_set(instruction, paragraph, problem):
     prompt = instruction + "\n지문 : " + paragraph + "\n문제 : " + problem + "\n 답 : "
-    question = instruction + "\n지문 : " + paragraph + "\n문제 : " + problem
+    question_set = instruction + "\n지문 : " + paragraph + "\n문제 : " + problem
 
-    return prompt, question
+    return prompt, question_set
     
 
 
@@ -34,7 +34,7 @@ class KoLLM():
         with torch.no_grad():
             for i in range(3):
 
-                prompt, question = Question_set(self.instruction, data["paragraphs"][i], data["problems"][i])
+                prompt, question_set = Question_set(self.instruction, data["paragraphs"][i], data["problems"][i])
                 inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
 
                 output = self.model.generate(
@@ -49,7 +49,7 @@ class KoLLM():
 
                 output = self.tokenizer.decode(output[0], skip_special_tokens=True)
 
-                Q_set_len = len(question)
+                Q_set_len = len(question_set)
 
                 outputs['paragraph'].append(data["paragraphs"][i])
                 outputs['problem'].append(data["problems"][i])
