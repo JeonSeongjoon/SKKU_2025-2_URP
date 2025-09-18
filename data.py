@@ -1,3 +1,4 @@
+import os
 import json
 import pandas as pd
 
@@ -9,6 +10,9 @@ def data_load(path):
     return data
 
 
-def toExcel(output):
+def Logging(output, save_path):
+
+    res_path = os.path.join(save_path, 'Output.xlsx')
+
     res = pd.DataFrame(output)
-    res.to_excel('Output')
+    res.to_excel(res_path)
