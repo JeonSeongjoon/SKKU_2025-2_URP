@@ -12,6 +12,9 @@ def data_load(path):
 
 def Logging(output, save_path):
 
+    if not os.path.exists(save_path):
+        os.mkdir(save_path)
+
     res_path = os.path.join(save_path, 'Output.xlsx')
 
     res = pd.DataFrame(output)
