@@ -28,7 +28,7 @@ INPUT = '''
 def load_infer_dataset(path: str, subpath)-> HFDataset:
 
     data_file = os.path.join(path, subpath)
-    dataset = hf_load_dataset("json", data_files = data_file)
+    dataset = hf_load_dataset("json", data_files = data_file, split="train")
 
     return dataset
 
@@ -52,29 +52,28 @@ def load_probs_dataset(path: str)-> HFDataset:
 def tokenize_dataset(
         split: HFDataset,
         tokenizer: Callable,
-        dstype : str,
 ):
     def process_func(unit):
         if dstype == 'i':
-            probs_toks = tokenizer(unit["input"])
-            infer_toks = tokenizer(unit["label"])
+            
+            input_text = unit["input"]
+            label_text = unit["label"]
+
+            full_text = input_text + " " + label_text
+
+            full_toks = tokenizer(full_text)
+            input_toks = tokenizer(input_text)
+
+            input_len = len(input_toks["input_ids"])
+
+            labels = full_toks["input_ids"].copy()
+            labels[:input_len] = [-100] * input_len
 
             return dict(
-                infer=probs_toks["input_ids"], 
-                probs=infer_toks["input_ids"],
+                input_ids=full_toks["input_ids"],
+                attention_mask=full_toks["attention_mask"], 
+                labels=labels
             )
-
-        else:
-            input = INPUT.format(
-                passage = unit["paragraph"],
-                problem = unit["problem"],
-                options = unit["options"]
-            )
-            input_toks = tokenizer(input)
-            
-            return dict( 
-                input=input_toks["input_ids"]
-                )
 
     ds = split.map(process_func, batched=False)
     return ds

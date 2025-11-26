@@ -20,8 +20,7 @@ def train_and_save_model(
         model_name,
 ):
     def data_postprocess(ds):
-        ds = ds.remove_columns(["paragraphs", "prob_num", "problems"])        # labels 추가
-        ds = ds.rename_column('', '')
+        ds = ds.remove_columns(["input", "label"])        # labels 추가
         ds.set_format("torch")
         return ds
     
@@ -33,7 +32,7 @@ def train_and_save_model(
 
 
     # postprocessing the data
-    train_ds.set_format("torch")
+    train_ds = data_postprocess(train_ds)
     test_ds = data_postprocess(test_ds)
 
 
@@ -41,21 +40,26 @@ def train_and_save_model(
     train_loader = DataLoader(  
         train_ds,
         shuffle = True,
-        batch_size = 32,                                         ### 16
+        batch_size = 1,                                         ### 16
         collate_fn = data_collator,
     )
 
     test_loader = DataLoader(
         test_ds,
         shuffle = False,
-        batch_size = 32,                                          ### 16
+        batch_size = 1,                                          ### 16
         collate_fn = data_collator,
     )
 
+    # configs
+    modelConfig = getConfig(model_name)
+
+    epochs = modelConfig["epochs"]
+    lr = modelConfig["lr"]
 
     num_steps = epochs * len(train_loader)
     criterion = nn.CrossEntropyLoss()
-    optimizer = AdamW(model.parameter(), lr=lr)
+    optimizer = AdamW(model.parameters(), lr=lr)
     scheduler = get_scheduler(
         "cosine",
         optimizer = optimizer,
@@ -65,12 +69,6 @@ def train_and_save_model(
     
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     model.to(device)
-    modelConfig = getConfig(model_name)
-
-
-    # configs
-    epochs = modelConfig["epochs"]
-    lr = modelConfig["lr"]
 
 
     best_ts_loss = float('inf')    

@@ -5,7 +5,7 @@ from peft import get_peft_model, prepare_model_for_kbit_training
 from transformers import (
    AutoTokenizer, 
    AutoModelForCausalLM, 
-   DataCollatorWithPadding,
+   DataCollatorForSeq2Seq,
 )
 
 from data import load_infer_dataset, load_probs_dataset, tokenize_dataset
@@ -27,13 +27,13 @@ def main(model_name, data_info):
    save_path = './result'
    
    # load dataset
-   train_ds = load_infer_dataset(infer_path, 'train_res.jsonl')
-   test_ds = load_infer_dataset(infer_path, 'train_res_valid.jsonl')
+   train_ds = load_infer_dataset(infer_path, 'infer_res.jsonl')
+   test_ds = load_infer_dataset(infer_path, 'infer_res_valid.jsonl')
 
    # preprocess dataset
    tokenizer = AutoTokenizer.from_pretrained(model_name)
-   train_ds = tokenize_dataset(train_ds, tokenizer, 'i')
-   test_ds = tokenize_dataset(test_ds, tokenizer, 'i')
+   train_ds = tokenize_dataset(train_ds, tokenizer)
+   test_ds = tokenize_dataset(test_ds, tokenizer)
    
    
    model = AutoModelForCausalLM.from_pretrained(
@@ -44,7 +44,12 @@ def main(model_name, data_info):
    )
    model = LoRA(model)
 
-   data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+   data_collator = DataCollatorForSeq2Seq(
+      tokenizer=tokenizer,
+      model=model,
+      padding=True,
+      label_pad_token_id=-100  # loss 계산 시 패딩 토큰 무시
+   )
    
 
    # train model
