@@ -54,26 +54,35 @@ def tokenize_dataset(
         tokenizer: Callable,
 ):
     def process_func(unit):
-        if dstype == 'i':
-            
-            input_text = unit["input"]
-            label_text = unit["label"]
+      
+      input_text = unit["input"]
+      label_text = unit["label"]
 
-            full_text = input_text + " " + label_text
+      full_text = input_text + " " + label_text
 
-            full_toks = tokenizer(full_text)
-            input_toks = tokenizer(input_text)
+      full_toks = tokenizer(
+        full_text,
+        max_length = 128,
+        truncation = True
+      )
+      input_toks = tokenizer(
+        input_text,
+        max_length = 128,
+        truncation = True
+      )
 
-            input_len = len(input_toks["input_ids"])
+      input_len = len(input_toks["input_ids"])
+      #pdb.set_trace()
 
-            labels = full_toks["input_ids"].copy()
-            labels[:input_len] = [-100] * input_len
 
-            return dict(
-                input_ids=full_toks["input_ids"],
-                attention_mask=full_toks["attention_mask"], 
-                labels=labels
-            )
+      labels = full_toks["input_ids"].copy()
+      labels[:input_len] = [-100] * input_len
+
+      return dict(
+          input_ids=full_toks["input_ids"],
+          attention_mask=full_toks["attention_mask"], 
+          labels=labels
+      )
 
     ds = split.map(process_func, batched=False)
     return ds

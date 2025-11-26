@@ -77,6 +77,7 @@ def train_and_save_model(
     # train process      
     tr_loss = 0
     tr_count = 0
+    step = 0
 
     for epoch in range(epochs):
         model.train()
@@ -94,6 +95,8 @@ def train_and_save_model(
 
             tr_loss += loss.item()
             tr_count += input['input_ids'].size(0)
+
+            ## step별로 train_loss 찍기
 
 
         ts_loss = 0
@@ -124,7 +127,7 @@ def train_and_save_model(
         
         
     # log the result
-    with open(os.path.join(save_path, 'log.jsonl'), "w", encoding='utf-8') as f:
+    with open(os.path.join(save_path, 'log', 'log.jsonl'), "w", encoding='utf-8') as f:
         for line in log:
             json.dump(line, f, ensure_ascii=False)
             f.write("\n")
