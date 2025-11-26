@@ -23,19 +23,17 @@ def LoRA(model):
 
 def main(model_name, data_info):
   
-   pb_path = './data/KSAT_LEET_probs'
-   if_path = './data/infer_result'
+   infer_path = './data/infer_result'
    save_path = './result'
    
    # load dataset
-   probs_ds = load_probs_dataset(pb_path)
-   infer_ds = load_infer_dataset(if_path)
-   _, _, test_ds = probs_ds["train"], probs_ds["validation"], probs_ds["test"] 
+   train_ds = load_infer_dataset(infer_path, 'train_res.jsonl')
+   test_ds = load_infer_dataset(infer_path, 'train_res_valid.jsonl')
 
    # preprocess dataset
    tokenizer = AutoTokenizer.from_pretrained(model_name)
-   infer_ds = tokenize_dataset(infer_ds, tokenizer, 'i')
-   test_ds = tokenize_dataset(test_ds, tokenizer, 'p')
+   train_ds = tokenize_dataset(train_ds, tokenizer, 'i')
+   test_ds = tokenize_dataset(test_ds, tokenizer, 'i')
    
    
    model = AutoModelForCausalLM.from_pretrained(
@@ -52,7 +50,7 @@ def main(model_name, data_info):
    # train model
    train_and_save_model(
       model,
-      infer_ds,
+      train_ds,
       test_ds,
       data_collator,
       save_path,  

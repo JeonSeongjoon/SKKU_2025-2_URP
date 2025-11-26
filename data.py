@@ -8,9 +8,26 @@ from datasets import Dataset as HFDataset
 from datasets import load_dataset as hf_load_dataset
 
 
-def load_infer_dataset(path: str)-> HFDataset:
+INPUT = '''
+{passage}                                          
 
-    data_file = os.path.join(path, "infer_res.jsonl")
+{problem}
+{options}
+
+한두 문장으로 매우 간단한 해설을 작성한 뒤, 정답 번호 하나를 제시하라.
+
+출력 형식
+"
+[해설]
+(한두 문장의 간단한 해설)
+
+정답: (1~5번 중 무조건 정답 하나)
+'''
+
+
+def load_infer_dataset(path: str, subpath)-> HFDataset:
+
+    data_file = os.path.join(path, subpath)
     dataset = hf_load_dataset("json", data_files = data_file)
 
     return dataset
@@ -48,14 +65,15 @@ def tokenize_dataset(
             )
 
         else:
-            para_toks = tokenizer(unit["paragraph"])
-            prob_toks = tokenizer(unit["problem"])
-            opts_toks = tokenizer(unit["options"])
+            input = INPUT.format(
+                passage = unit["paragraph"],
+                problem = unit["problem"],
+                options = unit["options"]
+            )
+            input_toks = tokenizer(input)
             
             return dict( 
-                para_ids=para_toks["input_ids"],
-                probs_ids=prob_toks["input_ids"],
-                opts_ids=opts_toks["input_ids"]
+                input=input_toks["input_ids"]
                 )
 
     ds = split.map(process_func, batched=False)
