@@ -1,4 +1,5 @@
 import os
+import gc
 import pdb
 import json
 import torch 
@@ -58,7 +59,7 @@ def train_and_save_model(
     lr = modelConfig["lr"]
 
     num_steps = epochs * len(train_loader)
-    criterion = nn.CrossEntropyLoss()
+    #loss_fn = nn.CrossEntropyLoss()
     optimizer = AdamW(model.parameters(), lr=lr)
     scheduler = get_scheduler(
         "cosine",
@@ -95,9 +96,14 @@ def train_and_save_model(
 
             tr_loss += loss.item()
             tr_count += input['input_ids'].size(0)
+            step += 1
 
-            ## step별로 train_loss 찍기
-
+            if step % 10 == 0:           ## logging the train_loss at every 10 steps
+                step_log = {
+                    "step" : step,
+                    "train_loss" : tr_loss/tr_count
+                }
+                log.append(step_log)
 
         ts_loss = 0
         model.eval()
@@ -113,21 +119,24 @@ def train_and_save_model(
 
         if avg_ts_loss < best_ts_loss:
             best_ts_loss = avg_ts_loss
-            torch.save(model.state_dict(), os.path.join(save_path, 'model_weights.pth'))
+            torch.save(model.state_dict(), os.path.join(save_path, 'model_weights_{model_name}.pth'))
 
         
-        log_dict = {
+        epoch_log = {
             "epoch" : epoch,
             "train_loss" : avg_tr_loss,
             "test_loss" : avg_ts_loss,
         }
-        log.append(log_dict)
+        log.append(epoch_log)
 
         # log.jsonl로 나올 수 있게끔 각 epoch별로 {epoch, tr_loss, ts_loss} 정도로
         
-        
+        gc.collect()
+        torch.cuda.empty_cache()
+
+
     # log the result
-    with open(os.path.join(save_path, 'log', 'log.jsonl'), "w", encoding='utf-8') as f:
+    with open(os.path.join(save_path, 'log', f'log_{model_name}_epoch:{epoch}_lr:{lr}.jsonl'), "w", encoding='utf-8') as f:
         for line in log:
             json.dump(line, f, ensure_ascii=False)
             f.write("\n")

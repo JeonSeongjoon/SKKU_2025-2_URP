@@ -62,13 +62,13 @@ def tokenize_dataset(
 
       full_toks = tokenizer(
         full_text,
-        max_length = 128,
-        truncation = True
+        #max_length = 2048,
+        #truncation = True
       )
       input_toks = tokenizer(
         input_text,
-        max_length = 128,
-        truncation = True
+        #max_length = 2048,
+        #truncation = True
       )
 
       input_len = len(input_toks["input_ids"])
@@ -86,43 +86,13 @@ def tokenize_dataset(
 
     ds = split.map(process_func, batched=False)
     return ds
-    
-    
-
-
-def Logging(output, save_path):
-    """
-    Old version of logging, it is not used.
-    """
-
-    if not os.path.exists(save_path):
-        os.mkdir(save_path)
-
-    res_path = os.path.join(save_path, 'output.xlsx')
-
-    res = pd.DataFrame(output)
-    res.to_excel(res_path)
 
 
 
-def rearrange_data(src_data_path, res_data_path):
-    '''
-    Being used only if it is necessary (No need to care).
-
-    The function for changing the file format from json to jsonl.
-    Original json file has the form of too much nested dictionaries. 
-    we used a rearrange_data function to process this problem.
-    '''
-
-    if not os.path.exists(res_data_path):
-        folder = os.path.dirname(res_data_path)
-        os.makedirs(folder)
-
-    with open(src_data_path, "r", encoding='utf-8') as f:
-        loaded_data = json.load(f)
-
-    with open(res_data_path, "w", encoding='utf-8') as f:
-        for _, v1 in loaded_data.items():
-            for _, v2 in v1[0]["paragraph_groups"].items():
-                json.dump(v2, f, ensure_ascii=False)
-                f.write("\n")
+def load_jsonl(file_path):
+    data = []
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            if line.strip():  # 빈 줄 건너뛰기
+                data.append(json.loads(line))
+    return data

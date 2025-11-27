@@ -15,7 +15,7 @@ from train import train_and_save_model
 
 
 def LoRA(model):
-    model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=False)
+    model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
     model = get_peft_model(model, LoRAConfig)  
     return model
 
@@ -65,6 +65,12 @@ def main(model_name, data_info):
 
 if __name__ == "__main__":
    model_name = "MLP-KTLim/llama-3-Korean-Bllossom-8B"
-   data_info = "infer_result"                          #KSAT_LEET_probs
+   data_info = "infer_result"                             #KSAT_LEET_probs
 
    main(model_name, data_info)
+
+
+   # Models
+   # kakaocorp/kanana-1.5-8b-instruct-2505
+   # LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct
+   # K-intelligence/Midm-2.0-Base-Instruct
