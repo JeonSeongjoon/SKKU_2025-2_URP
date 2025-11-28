@@ -7,7 +7,7 @@ MODEL_CONFIG = {
     
     "basic" : {
         "lr" : 1e-4,
-        "epochs" : 10,
+        "epochs" : 5,
     },
 }
 

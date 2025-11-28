@@ -24,12 +24,14 @@ def train_and_save_model(
         ds = ds.remove_columns(["input", "label"])        # labels 추가
         ds.set_format("torch")
         return ds
-    
 
-    # save the results
-    if not os.path.exists(save_path):
-        os.makedirs(os.path.join(save_path, 'model'))
-        os.makedirs(os.path.join(save_path, 'log'))
+    # create the save_path
+    os.makedirs(os.path.join(save_path, 'model'), exist_ok = True)
+    os.makedirs(os.path.join(save_path, 'log'), exist_ok = True)
+
+    # set the model info
+    model_li = model_name.split('/')
+    model_info = '-'.join(model_li)
 
 
     # postprocessing the data
@@ -81,6 +83,7 @@ def train_and_save_model(
     step = 0
 
     for epoch in range(epochs):
+
         model.train()
         for batch in tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]"): 
             optimizer.zero_grad()
@@ -105,6 +108,8 @@ def train_and_save_model(
                 }
                 log.append(step_log)
 
+
+
         ts_loss = 0
         model.eval()
         with torch.no_grad():
@@ -114,16 +119,16 @@ def train_and_save_model(
                 
                 ts_loss += output.loss.item()
                 
+
         avg_tr_loss = tr_loss/tr_count
         avg_ts_loss = ts_loss/len(test_loader)
 
         if avg_ts_loss < best_ts_loss:
             best_ts_loss = avg_ts_loss
-            torch.save(model.state_dict(), os.path.join(save_path, 'model_weights_{model_name}.pth'))
+            torch.save(model.state_dict(), os.path.join(save_path, 'model', f'model_weights_{model_info}.pth'))
 
-        
         epoch_log = {
-            "epoch" : epoch,
+            "epoch" : epoch+1,
             "train_loss" : avg_tr_loss,
             "test_loss" : avg_ts_loss,
         }
@@ -136,7 +141,7 @@ def train_and_save_model(
 
 
     # log the result
-    with open(os.path.join(save_path, 'log', f'log_{model_name}_epoch:{epoch}_lr:{lr}.jsonl'), "w", encoding='utf-8') as f:
+    with open(os.path.join(save_path, 'log', f'log_{model_info}_epochs:{epochs}_lr:{lr}.jsonl'), "w", encoding='utf-8') as f:
         for line in log:
             json.dump(line, f, ensure_ascii=False)
             f.write("\n")

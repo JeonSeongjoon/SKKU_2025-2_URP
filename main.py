@@ -64,7 +64,7 @@ def main(model_name, data_info):
    
 
 if __name__ == "__main__":
-   model_name = "MLP-KTLim/llama-3-Korean-Bllossom-8B"
+   model_name = "kakaocorp/kanana-1.5-8b-instruct-2505"
    data_info = "infer_result"                             #KSAT_LEET_probs
 
    main(model_name, data_info)

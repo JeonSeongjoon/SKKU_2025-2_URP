@@ -62,12 +62,12 @@ def tokenize_dataset(
 
       full_toks = tokenizer(
         full_text,
-        #max_length = 2048,
+        #max_length = 2,
         #truncation = True
       )
       input_toks = tokenizer(
         input_text,
-        #max_length = 2048,
+        #max_length = 2,
         #truncation = True
       )
 
