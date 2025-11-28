@@ -7,8 +7,7 @@ from data import load_jsonl
 file_name = 'log_kakaocorp-kanana-1.5-8b-instruct-2505_epochs:5_lr:0.0001.jsonl'
 file_path = os.path.join('./result/log', file_name)
 
-path_info = os.path.dirname(file_path)
-log_info = file_path.removeprefix(path_info)
+log_info = file_name.removesuffix('.jsonl')
 
 logData = load_jsonl(file_path)
 
