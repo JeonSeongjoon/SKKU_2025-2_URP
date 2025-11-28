@@ -1,4 +1,5 @@
 import os
+import re
 import pdb
 import torch
 from peft import get_peft_model, prepare_model_for_kbit_training
@@ -8,26 +9,83 @@ from transformers import (
    DataCollatorForSeq2Seq,
 )
 
-from data import load_infer_dataset, load_probs_dataset, tokenize_dataset
-from config import LoRAConfig, bnbConfig, getConfig
+from data import load_infer_dataset, tokenize_dataset, load_jsonl
+from config import LoRAConfig, bnbConfig
 from train import train_and_save_model
 
 
 
 def LoRA(model):
-    model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
-    model = get_peft_model(model, LoRAConfig)  
-    return model
+   model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
+   model = get_peft_model(model, LoRAConfig)  
+   return model
+
+
+def compute_accuracy(
+      model_name, 
+      best_model_pth,
+      infer_path,
+      tokenizer,
+   ):
+
+   valid_data_path = os.path.join(infer_path, 'infer_res_valid.jsonl')
+   device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+   # load the best model
+   model = AutoModelForCausalLM.from_pretrained(
+      model_name,
+      quantization_config = bnbConfig,
+      device_map="auto",
+      torch_dtype=torch.float16,
+   )
+   model = LoRA(model)
+   model.load_state_dict(torch.load(best_model_pth, map_location='cpu'), strict=False)
+   model.to(device)
+   
+   # load the label data
+   valid_data = load_jsonl(valid_data_path)
+
+   # compute the score
+   model.eval()
+   correct = 0
+   for line in valid_data:
+
+      inputs = tokenizer(
+         line["input"],
+         return_tensors='pt'
+      ).to(device)
+
+      with torch.no_grad():
+         output = model.generate(
+            **inputs,
+            temperature = 0.4,
+            do_sample = True,
+            pad_token_id=tokenizer.pad_token_id,
+         )
+      
+      res = tokenizer.decode(
+         output[0],
+         skip_special_tokens = True,
+      )
+
+      model_ans = re.search(r'정답:\s*(\d+)', res)
+      model_ans = int(model_ans.group(1)) if model_ans else None
+
+      if model_ans == line["answer"]:
+         correct += 1
+
+   print("[Accuracy : {:.4f}]".format(correct/len(valid_data)))
+   return 
 
 
 
-def main(model_name, data_info):
+def main(model_name):
   
    infer_path = './data/infer_result'
    save_path = './result'
    
    # load dataset
-   train_ds = load_infer_dataset(infer_path, 'infer_res.jsonl')
+   train_ds = load_infer_dataset(infer_path, 'infer_res_train.jsonl')
    test_ds = load_infer_dataset(infer_path, 'infer_res_valid.jsonl')
 
    # preprocess dataset
@@ -53,7 +111,7 @@ def main(model_name, data_info):
    
 
    # train model
-   train_and_save_model(
+   best_model_pth = train_and_save_model(
       model,
       train_ds,
       test_ds,
@@ -61,14 +119,21 @@ def main(model_name, data_info):
       save_path,  
       model_name,
    )
+
+
+   # compute the score
+   compute_accuracy(
+      model_name, 
+      best_model_pth,
+      infer_path,
+      tokenizer,
+   )
    
 
 if __name__ == "__main__":
    model_name = "kakaocorp/kanana-1.5-8b-instruct-2505"
-   data_info = "infer_result"                             #KSAT_LEET_probs
 
-   main(model_name, data_info)
-
+   main(model_name)
 
    # Models
    # kakaocorp/kanana-1.5-8b-instruct-2505

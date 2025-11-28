@@ -21,7 +21,7 @@ def train_and_save_model(
         model_name,
 ):
     def data_postprocess(ds):
-        ds = ds.remove_columns(["input", "label"])        # labels 추가
+        ds = ds.remove_columns(["input", "label", "answer"])        # labels 추가
         ds.set_format("torch")
         return ds
 
@@ -125,7 +125,8 @@ def train_and_save_model(
 
         if avg_ts_loss < best_ts_loss:
             best_ts_loss = avg_ts_loss
-            torch.save(model.state_dict(), os.path.join(save_path, 'model', f'model_weights_{model_info}.pth'))
+            best_model_pth = os.path.join(save_path, 'model', f'model_weights_{model_info}.pth')
+            torch.save(model.state_dict(), best_model_pth)
 
         epoch_log = {
             "epoch" : epoch+1,
@@ -145,6 +146,8 @@ def train_and_save_model(
         for line in log:
             json.dump(line, f, ensure_ascii=False)
             f.write("\n")
-        
+
+
+    return best_model_pth      
     
     
