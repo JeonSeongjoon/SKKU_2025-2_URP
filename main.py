@@ -77,8 +77,8 @@ def main(model_name, mode_flag):
 
    # compute the score
    compute_accuracy(
-      model, 
-      infer_path,
+      model,
+      test_ds, 
       tokenizer,
       model_name,
       mode_flag,

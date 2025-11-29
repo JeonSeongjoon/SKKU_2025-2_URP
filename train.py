@@ -19,6 +19,7 @@ def train_and_save_model(
         data_collator,
         save_path,
         model_name,
+        mode_flag,
 ):
     def data_postprocess(ds):
         ds = ds.remove_columns(["input", "label", "answer"])        # labels 추가
@@ -142,7 +143,7 @@ def train_and_save_model(
 
 
     # log the result
-    with open(os.path.join(save_path, 'log', f'log_{model_info}_epochs:{epochs}_lr:{lr}.jsonl'), "w", encoding='utf-8') as f:
+    with open(os.path.join(save_path, 'log', f'log_{model_info}_epochs:{epochs}_lr:{lr}_({mode_flag}).jsonl'), "w", encoding='utf-8') as f:
         for line in log:
             json.dump(line, f, ensure_ascii=False)
             f.write("\n")
