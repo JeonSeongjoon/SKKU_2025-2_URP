@@ -19,8 +19,7 @@ def compute_accuracy(
    model_info = '-'.join(model_li)
    
    # load the best model
-   device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-   model.to(device)
+   device = next(model.parameters()).device
    
    # load the label data
    labels = test_ds["answer"]

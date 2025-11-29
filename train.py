@@ -126,8 +126,8 @@ def train_and_save_model(
 
         if avg_ts_loss < best_ts_loss:
             best_ts_loss = avg_ts_loss
-            best_model_pth = os.path.join(save_path, 'model', f'model_weights_{model_info}.pth')
-            torch.save(model.state_dict(), best_model_pth)
+            best_model_pth = os.path.join(save_path, 'model', f'model_weights_{model_info}')
+            model.save_pretrained(best_model_pth)
 
         epoch_log = {
             "epoch" : epoch+1,

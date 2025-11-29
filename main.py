@@ -1,7 +1,7 @@
 import os
 import pdb
 import torch
-from peft import get_peft_model, prepare_model_for_kbit_training
+from peft import get_peft_model, prepare_model_for_kbit_training, PeftModel
 from transformers import (
    AutoTokenizer, 
    AutoModelForCausalLM, 
@@ -57,12 +57,13 @@ def main(model_name, mode_flag):
 
       # train model
       best_model_pth = train_and_save_model(
-         model,
-         train_ds,
-         test_ds,
-         save_path,  
-         model_name,
-         mode_flag,              #change
+        model,
+        train_ds,
+        test_ds,
+        data_collator,
+        save_path,
+        model_name,
+        mode_flag,           
       )
 
       # reinitialize the model
@@ -72,8 +73,7 @@ def main(model_name, mode_flag):
          device_map="auto",
          torch_dtype=torch.float16,
       )
-      model = LoRA(model)
-      model.load_state_dict(torch.load(best_model_pth, map_location='cpu'), strict=False)
+      model = PeftModel.from_pretrained(model, best_model_pth)
 
 
    # compute the score
