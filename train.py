@@ -88,7 +88,7 @@ def train_and_save_model(
         for batch in tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]"): 
             optimizer.zero_grad()
             
-            input = batch.to(device)
+            input = {k: v.to(device) for k, v in batch.items()}
             output = model(**input)
 
             loss = output.loss
@@ -114,7 +114,7 @@ def train_and_save_model(
         model.eval()
         with torch.no_grad():
             for batch in test_loader:
-                input = batch.to(device)
+                input = {k: v.to(device) for k, v in batch.items()}
                 output = model(**input)
                 
                 ts_loss += output.loss.item()

@@ -1,5 +1,4 @@
 import os
-import re
 import pdb
 import torch
 from peft import get_peft_model, prepare_model_for_kbit_training
@@ -9,9 +8,10 @@ from transformers import (
    DataCollatorForSeq2Seq,
 )
 
-from data import load_infer_dataset, tokenize_dataset, load_jsonl
+from data import load_infer_dataset, tokenize_dataset
 from config import LoRAConfig, bnbConfig
 from train import train_and_save_model
+from compute import compute_accuracy
 
 
 
@@ -19,57 +19,6 @@ def LoRA(model):
    model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
    model = get_peft_model(model, LoRAConfig)  
    return model
-
-
-def compute_accuracy(
-      model, 
-      infer_path,
-      tokenizer,
-   ):
-
-   valid_data_path = os.path.join(infer_path, 'infer_res_valid.jsonl')
-   
-   # load the best model
-   device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-   model.to(device)
-   
-   # load the label data
-   valid_data = load_jsonl(valid_data_path)
-
-   # compute the score
-   model.eval()
-   correct = 0
-   total = 0
-   for line in valid_data:
-
-      inputs = tokenizer(
-         line["input"],
-         return_tensors='pt'
-      ).to(device)
-
-      with torch.no_grad():
-         output = model.generate(
-            **inputs,
-            temperature = 0.4,
-            do_sample = True,
-            pad_token_id=tokenizer.pad_token_id,
-         )
-      
-      res = tokenizer.decode(
-         output[0],
-         skip_special_tokens = True,
-      )
-
-      model_ans = re.search(r'정답:\s*(\d+)', res)
-      model_ans = int(model_ans.group(1)) if model_ans else None
-
-      if model_ans == line["answer"]:
-         correct += 1
-      total += 1
-
-   print("[Accuracy : {:.4f}]".format(correct/total))
-   return 
-
 
 
 def main(model_name, mode_flag):
@@ -92,6 +41,7 @@ def main(model_name, mode_flag):
       quantization_config = bnbConfig,
       device_map="auto",
       torch_dtype=torch.float16,
+      trust_remote_code=True,
    )
    model = LoRA(model)
 
@@ -110,7 +60,6 @@ def main(model_name, mode_flag):
          model,
          train_ds,
          test_ds,
-         data_collator,
          save_path,  
          model_name,
       )
@@ -131,6 +80,8 @@ def main(model_name, mode_flag):
       model, 
       infer_path,
       tokenizer,
+      model_name,
+      mode_flag,
    )
 
 
