@@ -62,6 +62,7 @@ def main(model_name, mode_flag):
          test_ds,
          save_path,  
          model_name,
+         mode_flag,              #change
       )
 
       # reinitialize the model
