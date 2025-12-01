@@ -46,6 +46,7 @@ def main(model_name, mode_flag):
    model = LoRA(model)
 
 
+   best_model_pth = None
    if mode_flag == 'trained':
 
       data_collator = DataCollatorForSeq2Seq(

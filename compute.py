@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 from peft import PeftModel
 from transformers import AutoModelForCausalLM
 from config import bnbConfig
+from main import LoRA
 
 
 def compute_accuracy(
@@ -25,7 +26,11 @@ def compute_accuracy(
       device_map="auto",
       torch_dtype=torch.float16,
    )
-   model = PeftModel.from_pretrained(model, best_model_pth)
+
+   if best_model_pth:
+      model = LoRA(model)
+   else:
+      model = PeftModel.from_pretrained(model, best_model_pth)
 
    # set the model info
    model_li = model_name.split('/')
