@@ -1,7 +1,7 @@
 import os
 import pdb
 import torch
-from peft import get_peft_model, prepare_model_for_kbit_training, PeftModel
+from peft import get_peft_model, prepare_model_for_kbit_training
 from transformers import (
    AutoTokenizer, 
    AutoModelForCausalLM, 

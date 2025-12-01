@@ -5,11 +5,15 @@ import torch
 
 from torch.utils.data import DataLoader
 
-from peft import PeftModel
+from peft import PeftModel, get_peft_model, prepare_model_for_kbit_training
 from transformers import AutoModelForCausalLM
-from config import bnbConfig
-from main import LoRA
+from config import bnbConfig, LoRAConfig
 
+
+def LoRA(model):
+   model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
+   model = get_peft_model(model, LoRAConfig)  
+   return model
 
 def compute_accuracy(
       best_model_pth,
