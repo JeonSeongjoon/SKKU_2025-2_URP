@@ -25,6 +25,15 @@ def train_and_save_model(
         ds = ds.remove_columns(["input", "label", "answer"])        # labels 추가
         ds.set_format("torch")
         return ds
+    
+    # configs
+    modelConfig = getConfig(model_name)
+
+    epochs = modelConfig["epochs"]
+    lr = modelConfig["lr"]
+    batch_size = modelConfig["batch_size"]
+
+
 
     # create the save_path
     os.makedirs(os.path.join(save_path, 'model'), exist_ok = True)
@@ -34,8 +43,10 @@ def train_and_save_model(
     model_li = model_name.split('/')
     model_info = '-'.join(model_li)
 
-
     # postprocessing the data
+    #train_ans = train_ds["answer"] 
+    #test_ans = test_ds["answer"]
+
     train_ds = data_postprocess(train_ds)
     test_ds = data_postprocess(test_ds)
 
@@ -44,22 +55,17 @@ def train_and_save_model(
     train_loader = DataLoader(  
         train_ds,
         shuffle = True,
-        batch_size = 1,                                         ### 16
+        batch_size = batch_size,                                         ### 16
         collate_fn = data_collator,
     )
 
     test_loader = DataLoader(
         test_ds,
         shuffle = False,
-        batch_size = 1,                                          ### 16
+        batch_size = batch_size,                                          ### 16
         collate_fn = data_collator,
     )
 
-    # configs
-    modelConfig = getConfig(model_name)
-
-    epochs = modelConfig["epochs"]
-    lr = modelConfig["lr"]
 
     num_steps = epochs * len(train_loader)
     #loss_fn = nn.CrossEntropyLoss()
@@ -79,12 +85,12 @@ def train_and_save_model(
     log = []
 
     # train process      
-    tr_loss = 0
     tr_count = 0
     step = 0
 
     for epoch in range(epochs):
-
+        
+        tr_loss = 0
         model.train()
         for batch in tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]"): 
             optimizer.zero_grad()
@@ -120,14 +126,15 @@ def train_and_save_model(
                 
                 ts_loss += output.loss.item()
                 
-
         avg_tr_loss = tr_loss/tr_count
         avg_ts_loss = ts_loss/len(test_loader)
+
 
         if avg_ts_loss < best_ts_loss:
             best_ts_loss = avg_ts_loss
             best_model_pth = os.path.join(save_path, 'model', f'model_weights_{model_info}')
             model.save_pretrained(best_model_pth)
+
 
         epoch_log = {
             "epoch" : epoch+1,

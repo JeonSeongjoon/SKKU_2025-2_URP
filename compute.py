@@ -5,14 +5,27 @@ import torch
 
 from torch.utils.data import DataLoader
 
+from peft import PeftModel
+from transformers import AutoModelForCausalLM
+from config import bnbConfig
+
 
 def compute_accuracy(
-      model,
+      best_model_pth,
       test_ds, 
       tokenizer,
       model_name,
       mode_flag,
    ):
+
+   # reinitialize the model
+   model = AutoModelForCausalLM.from_pretrained(
+      model_name,
+      quantization_config = bnbConfig,
+      device_map="auto",
+      torch_dtype=torch.float16,
+   )
+   model = PeftModel.from_pretrained(model, best_model_pth)
 
    # set the model info
    model_li = model_name.split('/')

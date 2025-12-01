@@ -46,7 +46,7 @@ def main(model_name, mode_flag):
    model = LoRA(model)
 
 
-   if mode_flag == 'train':
+   if mode_flag == 'trained':
 
       data_collator = DataCollatorForSeq2Seq(
          tokenizer=tokenizer,
@@ -66,31 +66,20 @@ def main(model_name, mode_flag):
         mode_flag,           
       )
 
-      # reinitialize the model
-      model = AutoModelForCausalLM.from_pretrained(
-         model_name,
-         quantization_config = bnbConfig,
-         device_map="auto",
-         torch_dtype=torch.float16,
-      )
-      model = PeftModel.from_pretrained(model, best_model_pth)
-
-
    # compute the score
    compute_accuracy(
-      model,
+      best_model_pth,
       test_ds, 
       tokenizer,
       model_name,
       mode_flag,
    )
 
-
    
 
 if __name__ == "__main__":
    model_name = "kakaocorp/kanana-1.5-8b-instruct-2505"
-   mode_flag = 'vanilla'       # or 'train'
+   mode_flag = 'vanilla'       # or 'trained'
 
    main(model_name, mode_flag)
 

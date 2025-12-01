@@ -8,6 +8,7 @@ MODEL_CONFIG = {
     "basic" : {
         "lr" : 1e-4,
         "epochs" : 5,
+        "batch_size": 1,
     },
 }
 
