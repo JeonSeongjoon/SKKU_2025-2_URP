@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 from peft import PeftModel, get_peft_model, prepare_model_for_kbit_training
 from transformers import AutoModelForCausalLM
 from config import bnbConfig, LoRAConfig
+from data import load_jsonl, setting_problem_form
 
 
 def LoRA(model):
@@ -16,8 +17,7 @@ def LoRA(model):
    return model
 
 def compute_accuracy(
-      best_model_pth,
-      test_ds, 
+      best_model_pth, 
       tokenizer,
       model_name,
       mode_flag,
@@ -29,12 +29,13 @@ def compute_accuracy(
       quantization_config = bnbConfig,
       device_map="auto",
       torch_dtype=torch.float16,
+      trust_remote_code=True,
    )
 
    if best_model_pth:
-      model = LoRA(model)
-   else:
       model = PeftModel.from_pretrained(model, best_model_pth)
+   else:
+      model = LoRA(model)
 
    # set the model info
    model_li = model_name.split('/')
@@ -44,15 +45,9 @@ def compute_accuracy(
    device = next(model.parameters()).device
    
    # load the label data
-   labels = test_ds["answer"]
-   test_ds = test_ds.remove_columns(["label", "labels", "input", "answer"])  
-   test_ds.set_format("torch")
-
-   dataloader = DataLoader(
-       test_ds,
-       shuffle = False,
-       batch_size = 1,                                         
-   )
+   test_ds_path = './data/KSAT_LEET_probs/validation.jsonl'
+   test_ds = load_jsonl(test_ds_path)
+  
 
    print("Evaluating the performance of the model.")
 
@@ -63,8 +58,11 @@ def compute_accuracy(
    correct = 0
    total = 0
 
-   for batch in dataloader:
-      input = {k: v.to(device) for k, v in batch.items()}
+   for prob in test_ds:
+      
+      input_text = setting_problem_form(prob["paragraph"], prob["problem"], prob["options"])
+
+      input = tokenizer(input_text, return_tensors='pt')
 
       with torch.no_grad():
          output = model.generate(
@@ -82,7 +80,7 @@ def compute_accuracy(
       # record the output
       record.append({
         "output" : res, 
-        "answer" : labels[total] 
+        "answer" : prob["answer"] 
       })
 
      
@@ -90,7 +88,7 @@ def compute_accuracy(
       model_ans = re.search(r'정답:\s*(\d+)', res)
       model_ans = int(model_ans.group(1)) if model_ans else None
      
-      if model_ans == labels[total]:
+      if model_ans == prob["answer"]:
          correct += 1
 
       total += 1

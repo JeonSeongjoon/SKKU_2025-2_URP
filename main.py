@@ -69,8 +69,7 @@ def main(model_name, mode_flag):
 
    # compute the score
    compute_accuracy(
-      best_model_pth,
-      test_ds, 
+      best_model_pth, 
       tokenizer,
       model_name,
       mode_flag,

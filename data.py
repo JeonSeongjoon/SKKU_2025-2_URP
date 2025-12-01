@@ -96,3 +96,15 @@ def load_jsonl(file_path):
             if line.strip():  # 빈 줄 건너뛰기
                 data.append(json.loads(line))
     return data
+
+
+
+def setting_problem_form(paragraph, problem, options):
+
+    input_text = INPUT.format(
+        paragraph=paragraph,
+        problem=problem,
+        options=options
+    )
+
+    return input_text
