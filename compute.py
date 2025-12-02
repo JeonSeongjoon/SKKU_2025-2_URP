@@ -32,7 +32,7 @@ def compute_accuracy(
       trust_remote_code=True,
    )
 
-   if best_model_pth:
+   if mode_flag == 'trained':
       model = PeftModel.from_pretrained(model, best_model_pth)
    else:
       model = LoRA(model)
@@ -62,11 +62,12 @@ def compute_accuracy(
       
       input_text = setting_problem_form(prob["paragraph"], prob["problem"], prob["options"])
 
-      input = tokenizer(input_text, return_tensors='pt')
+      Input = tokenizer(input_text, return_tensors='pt')
+      Input = {k: v.to(device) for k, v in Input.items()}
 
       with torch.no_grad():
          output = model.generate(
-            **input,
+            **Input,
             temperature = 0.4,
             do_sample = True,
          )

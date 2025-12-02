@@ -35,19 +35,20 @@ def main(model_name, mode_flag):
    train_ds = tokenize_dataset(train_ds, tokenizer)
    test_ds = tokenize_dataset(test_ds, tokenizer)
    
-   
-   model = AutoModelForCausalLM.from_pretrained(
+
+
+   best_model_pth = None
+   if mode_flag == 'trained':
+
+      model = AutoModelForCausalLM.from_pretrained(
       model_name,
       quantization_config = bnbConfig,
       device_map="auto",
       torch_dtype=torch.float16,
       trust_remote_code=True,
-   )
-   model = LoRA(model)
-
-
-   best_model_pth = None
-   if mode_flag == 'trained':
+      )
+      model = LoRA(model)
+      
 
       data_collator = DataCollatorForSeq2Seq(
          tokenizer=tokenizer,
@@ -75,6 +76,22 @@ def main(model_name, mode_flag):
       mode_flag,
    )
 
+
+def tested(model_name):
+
+  best_model_pth = '/content/SKKU_2025-2_URP/result/model/model_weights_LGAI-EXAONE-EXAONE-3.5-7.8B-Instruct'
+
+  # preprocess dataset
+  tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+  # compute the score
+  compute_accuracy(
+      best_model_pth, 
+      tokenizer,
+      model_name,
+      mode_flag,
+  )
+
    
 
 if __name__ == "__main__":
@@ -82,6 +99,7 @@ if __name__ == "__main__":
    mode_flag = 'vanilla'       # or 'trained'
 
    main(model_name, mode_flag)
+   #tested(model_name)
 
    # Models
    # kakaocorp/kanana-1.5-8b-instruct-2505

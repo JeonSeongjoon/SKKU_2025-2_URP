@@ -32,7 +32,7 @@ plt.plot(X_tr, Y_tr, color='blue', label='Train_loss')
 plt.scatter(X_ts, Y_ts, color='green', label='Test_loss')
 plt.title(f'{log_info}')
 plt.xlabel('step'); plt.ylabel('loss')
-plt.savefig('train_history_fig.png')
+plt.savefig(f'train_history_fig_{log_info}.png')
 plt.show()
 
 

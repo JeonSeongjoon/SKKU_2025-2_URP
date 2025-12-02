@@ -9,19 +9,21 @@ from datasets import load_dataset as hf_load_dataset
 
 
 INPUT = '''
-{passage}                                          
+다음 지문을 읽고 문제에 대한 답을 작성하라
+
+{paragraph}                                          
 
 {problem}
 {options}
 
-한두 문장으로 매우 간단한 해설을 작성한 뒤, 정답 번호 하나를 제시하라.
-
-출력 형식
+출력 형식은 아래와 같다.
 "
 [해설]
 (한두 문장의 간단한 해설)
 
 정답: (1~5번 중 무조건 정답 하나)
+"
+[해설] :
 '''
 
 
