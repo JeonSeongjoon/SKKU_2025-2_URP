@@ -10,6 +10,8 @@ from transformers import AutoModelForCausalLM
 from config import bnbConfig, LoRAConfig
 from data import load_jsonl, setting_problem_form
 
+from tqdm import tqdm
+
 
 def LoRA(model):
    model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
@@ -58,7 +60,7 @@ def compute_accuracy(
    correct = 0
    total = 0
 
-   for prob in test_ds:
+   for prob in tqdm(test_ds, desc="[Test_acc]"):
       
       input_text = setting_problem_form(prob["paragraph"], prob["problem"], prob["options"])
 
@@ -70,7 +72,7 @@ def compute_accuracy(
             **Input,
             temperature = 0.4,
             do_sample = True,
-            max_new_tokens = 512,
+            max_new_tokens = 1024,
          )
       
       res = tokenizer.decode(

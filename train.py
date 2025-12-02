@@ -132,7 +132,7 @@ def train_and_save_model(
 
         if avg_ts_loss < best_ts_loss:
             best_ts_loss = avg_ts_loss
-            best_model_pth = os.path.join(save_path, 'model', f'model_weights_{model_info}')
+            best_model_pth = os.path.join(save_path, 'model', f'model_weights_{model_info}_epoch:{epochs}_lr:{lr}')
             model.save_pretrained(best_model_pth)
 
 
