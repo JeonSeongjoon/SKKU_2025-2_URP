@@ -70,6 +70,7 @@ def compute_accuracy(
             **Input,
             temperature = 0.4,
             do_sample = True,
+            max_new_tokens = 512,
          )
       
       res = tokenizer.decode(
