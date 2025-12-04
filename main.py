@@ -41,11 +41,11 @@ def main(model_name, mode_flag):
    if mode_flag == 'trained':
 
       model = AutoModelForCausalLM.from_pretrained(
-      model_name,
-      quantization_config = bnbConfig,
-      device_map="auto",
-      torch_dtype=torch.float16,
-      trust_remote_code=True,
+         model_name,
+         quantization_config = bnbConfig,
+         device_map="auto",
+         torch_dtype=torch.float16,
+         trust_remote_code=True,
       )
       model = LoRA(model)
       
@@ -77,7 +77,7 @@ def main(model_name, mode_flag):
    )
 
 
-def tested(model_name):
+def tested(model_name, mode_flag):
 
   best_model_pth = '/content/SKKU_2025-2_URP/result/model/model_weights_LGAI-EXAONE-EXAONE-3.5-7.8B-Instruct'
 
@@ -99,7 +99,7 @@ if __name__ == "__main__":
    mode_flag = 'vanilla'       # or 'trained'
 
    main(model_name, mode_flag)
-   #tested(model_name)
+   #tested(model_name, mode_flag)
 
    # Models
    # kakaocorp/kanana-1.5-8b-instruct-2505
