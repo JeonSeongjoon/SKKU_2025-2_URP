@@ -77,9 +77,9 @@ def main(model_name, mode_flag):
    )
 
 
-def tested(model_name, mode_flag):
+def test_best_model(model_name, mode_flag):
 
-  best_model_pth = '/content/SKKU_2025-2_URP/result/model/model_weights_LGAI-EXAONE-EXAONE-3.5-7.8B-Instruct'
+  best_model_pth = './result/model/model_weights_LGAI-EXAONE-EXAONE-3.5-7.8B-Instruct'
 
   # preprocess dataset
   tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -99,9 +99,9 @@ if __name__ == "__main__":
    mode_flag = 'vanilla'       # or 'trained'
 
    main(model_name, mode_flag)
-   #tested(model_name, mode_flag)
+   #test_best_model(model_name, mode_flag)
 
    # Models
    # kakaocorp/kanana-1.5-8b-instruct-2505
    # LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct
-   # K-intelligence/Midm-2.0-Base-Instruct
+   # skt/A.X-4.0-Light
